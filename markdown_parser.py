@@ -21,7 +21,7 @@ def markdown_to_gtk(text: str) -> str:
     # Monospace
     txt = re.sub(r"\`(.+)\`", r"<tt>\1</tt>", txt)
     # Code Block
-    txt = re.sub(r"\`\`\`([\s\S]*?)\`\`\`", r"<tt>\1</tt>", txt)
+    txt = re.sub(r"\`\`([\s\S]*?)\`\`", r"<tt>\1</tt>", txt)
     # Strikethrough
     txt = re.sub(r"\~([0-9a-zA-Z ]+)\~", r"<s>\1</s>", txt)
     print(txt)
