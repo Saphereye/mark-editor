@@ -1,40 +1,21 @@
 import gi
-import parser
+import markdown_parser
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk
-
-# This would typically be its own file
-MENU_XML = """
-<?xml version="1.0" encoding="UTF-8"?>
-<interface>
-  <menu id="app-menu">
-    <section>
-        <item>
-            <attribute name="label">About</attribute>
-            <attribute name="action">app.about</attribute>
-        </item>
-        <item>
-            <attribute name="label">Quit</attribute>
-            <attribute name="action">app.quit</attribute>
-        </item>
-    </section>
-  </menu>
-</int
-"""
-
 
 class MainWindow(Gtk.Window):
     def __init__(self):
         super().__init__(title="Markdown editor")
         self.grid = Gtk.Grid()
-
-        self.draw_menu()
+        self.initiate_key_press_sensing()
+        self.load_css()
+        #self.draw_menu()
         self.draw_body()
     
     def on_update(self, gparamstring):
         self.markdown_output.set_markup(
-            parser.markdown_to_gtk(
+            markdown_parser.markdown_to_gtk(
                 self.text_buffer.get_text(
                     self.text_buffer.get_start_iter(),
                     self.text_buffer.get_end_iter(),
@@ -68,7 +49,7 @@ class MainWindow(Gtk.Window):
     def on_refresh_clicked(self, button):
         self.text_buffer.set_text("")
     
-    def draw_body(self):        
+    def draw_body(self):     
         self.input_scroll = Gtk.ScrolledWindow()
         self.user_input = Gtk.TextView()
         self.text_buffer = self.user_input.get_buffer()
@@ -93,16 +74,50 @@ class MainWindow(Gtk.Window):
         uimanager = Gtk.UIManager()
 
         # Throws exception if something went wrong
-        uimanager.add_ui_from_string(UI_INFO)
+        # uimanager.add_ui_from_string(UI_INFO)
 
         # Add the accelerator group to the toplevel window
         accelgroup = uimanager.get_accel_group()
         self.add_accel_group(accelgroup)
         return uimanager
+    
+    def load_css(self):
+        with open('main.css', 'r') as file:
+            css = bytes(file.read(), 'utf8')
+        css_provider = Gtk.CssProvider()
+        css_provider.load_from_data(css)
+        context = Gtk.StyleContext()
+        screen = Gdk.Screen.get_default()
+        context.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+    
+    def initiate_key_press_sensing(self):
+        self.connect("key-press-event",self.key_press_event)
+        self.connect("key-release-event",self.key_release_event)
+        self.key_buffer = {}
+    
+    def key_press_event(self, widget, event):
+        keyname = Gdk.keyval_name(event.keyval)
+        self.key_buffer[keyname] = True
+        self.perform_shortcut_action()
+    
+    def key_release_event(self, widget, event):
+        keyname = Gdk.keyval_name(event.keyval)
+        self.key_buffer[keyname] = False
+    
+    def perform_shortcut_action(self):
+        if self.key_buffer['Control_L']:
+            if self.key_buffer['s']:
+                print("Save")
+    
+    def save(self):
+        pass
+    def cut(self):
+        pass
+    def paste(self):
+        pass
 
 window = MainWindow()
 window.set_default_size(800, 600)
-window.set_border_width(10)
 window.set_position(Gtk.WindowPosition.CENTER)
 window.connect("destroy", Gtk.main_quit)
 window.show_all()
