@@ -1,3 +1,4 @@
+/*
 * {
     background: rgb(2,0,36);
 }
@@ -12,4 +13,10 @@ label {
 textview text {
     background: rgb(2,0,36);
     background-position: center;
+}
+*/
+
+label {
+    font-family: 'Fira Code';
+    font-size: xx-large;
 }

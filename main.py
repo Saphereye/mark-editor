@@ -1,16 +1,22 @@
+#!/usr/bin/env python3
+
 import gi
 import markdown_parser
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk
 
+WINDOW_HEIGHT = 600
+WINDOW_WIDTH = 800
+
 class MainWindow(Gtk.Window):
     def __init__(self):
         super().__init__(title="Markdown editor")
-        self.grid = Gtk.Grid()
+        self.box = Gtk.HBox()
+        self.pane1 = Gtk.HPaned()
+        self.pane2 = Gtk.HPaned()
         self.initiate_key_press_sensing()
         self.load_css()
-        #self.draw_menu()
         self.draw_body()
     
     def on_update(self, gparamstring):
@@ -24,51 +30,25 @@ class MainWindow(Gtk.Window):
             )
         )
     
-    def draw_menu(self):
-        bar = Gtk.Toolbar()
-
-        refresh_btn = Gtk.ToolButton(Gtk.STOCK_REFRESH)
-        refresh_btn.connect("clicked", self.on_refresh_clicked)
-
-        save_btn = Gtk.ToolButton(Gtk.STOCK_SAVE)
-        save_btn.connect("clicked", self.on_refresh_clicked)
-
-        zoom_in_btn = Gtk.ToolButton(Gtk.STOCK_ZOOM_IN)
-        zoom_in_btn.connect("clicked", self.on_refresh_clicked)
-
-        zoom_out_btn = Gtk.ToolButton(Gtk.STOCK_ZOOM_OUT)
-        zoom_out_btn.connect("clicked", self.on_refresh_clicked)
-
-        bar.insert(refresh_btn, 0)
-        bar.insert(save_btn, 1)
-        bar.insert(zoom_in_btn, 2)
-        bar.insert(zoom_out_btn, 3)
-
-        self.grid.attach(bar, 0, 0, 1, 1)
-    
-    def on_refresh_clicked(self, button):
-        self.text_buffer.set_text("")
-    
     def draw_body(self):     
         self.input_scroll = Gtk.ScrolledWindow()
         self.user_input = Gtk.TextView()
         self.text_buffer = self.user_input.get_buffer()
         self.text_buffer.set_text("Input")
-        self.user_input.set_hexpand(True)
-        self.user_input.set_vexpand(True)
         self.text_buffer.connect("changed", self.on_update)
         self.input_scroll.add(self.user_input)
-        self.grid.attach(self.input_scroll, 0, 1, 1, 1)
+        self.pane1.add(self.input_scroll)
+        self.pane1.add(self.pane2)
 
         self.markdown_scroll = Gtk.ScrolledWindow()
         self.markdown_output = Gtk.Label()
         self.markdown_output.set_markup("<i>Output</i>")
-        self.markdown_output.set_hexpand(True)
-        self.markdown_output.set_vexpand(True)
         self.markdown_scroll.add(self.markdown_output)
-        self.grid.attach(self.markdown_scroll, 1, 1, 1, 1)
+        self.pane2.add(self.markdown_scroll)
 
-        self.add(self.grid)
+        self.box.pack_start(self.pane1, True, True, 0)
+        self.input_scroll.set_size_request(WINDOW_WIDTH//3, -1)
+        self.add(self.box)
     
     # UI Logic
     def create_ui_manager(self):
@@ -131,7 +111,7 @@ class MainWindow(Gtk.Window):
         print("paste")
 
 window = MainWindow()
-window.set_default_size(800, 600)
+window.set_default_size(WINDOW_WIDTH, WINDOW_HEIGHT)
 window.set_position(Gtk.WindowPosition.CENTER)
 window.connect("destroy", Gtk.main_quit)
 window.show_all()
