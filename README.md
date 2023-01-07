@@ -2,7 +2,7 @@ Mark-Editor
 ---
 
 Markdown editor made in python
-![image](https://user-images.githubusercontent.com/59739923/211052460-fdbac291-432c-4515-80e0-7ab25b5a87c3.png)
+![image](https://user-images.githubusercontent.com/59739923/211162342-bb1a96af-ff21-4474-8cdb-0b56ccd2968e.png)
 
 ## Requirements
 ### Modules
