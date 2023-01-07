@@ -70,13 +70,9 @@ class MainWindow(Gtk.Window):
 
         self.add(self.grid)
     
+    # UI Logic
     def create_ui_manager(self):
         uimanager = Gtk.UIManager()
-
-        # Throws exception if something went wrong
-        # uimanager.add_ui_from_string(UI_INFO)
-
-        # Add the accelerator group to the toplevel window
         accelgroup = uimanager.get_accel_group()
         self.add_accel_group(accelgroup)
         return uimanager
@@ -90,6 +86,7 @@ class MainWindow(Gtk.Window):
         screen = Gdk.Screen.get_default()
         context.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
     
+    # Key Event Logic
     def initiate_key_press_sensing(self):
         self.connect("key-press-event",self.key_press_event)
         self.connect("key-release-event",self.key_release_event)
@@ -104,17 +101,34 @@ class MainWindow(Gtk.Window):
         keyname = Gdk.keyval_name(event.keyval)
         self.key_buffer[keyname] = False
     
+    # Shortcut Logic
+
     def perform_shortcut_action(self):
+        """
+        Reads the dict key-buffer 
+        and checks which shortcut was pressed
+        by taking Ctrl, Shift as higher precedence
+        """
         if self.key_buffer['Control_L']:
             if self.key_buffer['s']:
-                print("Save")
+                self.save()
+            elif self.key_buffer['x']:
+                self.cut()
+            elif self.key_buffer['v']:
+                self.paste()
     
     def save(self):
-        pass
+        # TODO Open a save window to take user input
+        print("save")
+    
     def cut(self):
-        pass
+        # TODO Delete contents and keep in clipboard
+        print("cut")
+    
     def paste(self):
-        pass
+        # TODO Print contents from clipboard
+        # TODO Add logic for adding image when pasted
+        print("paste")
 
 window = MainWindow()
 window.set_default_size(800, 600)

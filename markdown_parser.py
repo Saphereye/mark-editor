@@ -2,6 +2,8 @@ import re
 
 def markdown_to_gtk(text: str) -> str:
     txt = text
+    # Not ignoring '<' symbol
+    txt = re.sub(r"<", r'&#x003C;', txt)
     # Bullet
     txt = re.sub(r"- (.+)\n", r"• \1\n", txt)
     # Bold
@@ -22,5 +24,6 @@ def markdown_to_gtk(text: str) -> str:
     txt = re.sub(r"\`\`\`([\s\S]*?)\`\`\`", r"<tt>\1</tt>", txt)
     # Strikethrough
     txt = re.sub(r"\~([0-9a-zA-Z ]+)\~", r"<s>\1</s>", txt)
+    print(txt)
 
     return txt

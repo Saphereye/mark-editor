@@ -4,13 +4,12 @@
 
 label { 
     background: rgb(2,0,36);
-    background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 10%, rgba(0,212,255,1) 100%);  
-}
-
-textview text:hover { 
-    background: rgb(255, 255, 255);
+    background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 10%, rgba(0,212,255,1) 100%);
+    font-family: 'Fira Code';
+    font-size: xx-large;
 }
 
 textview text {
     background: rgb(2,0,36);
+    background-position: center;
 }
