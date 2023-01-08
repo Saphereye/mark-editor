@@ -16,7 +16,7 @@ textview text {
 }
 */
 
-label {
+#output {
     font-family: 'Fira Code';
     font-size: xx-large;
 }

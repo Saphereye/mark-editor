@@ -1,25 +1,32 @@
 import re
 from enum import Enum
 
+"""BUG
+Writing '-- ' converts it into '-.'
+"""
+
 def markdown_to_gtk(text: str) -> str:
     txt = text
     # Not ignoring '<' symbol
     txt = re.sub(r"<", r'&#x003C;', txt)
     txt = re.sub(r">", r'&#x003E;', txt)
+    # Escape characters
+    txt = re.sub(r"\\\*", r"&#x002A;", txt)
+    txt = re.sub(r"\\\_", r"&#x005F;", txt)
     # Bullet
     txt = re.sub(r"- (.+)\n", r"• \1\n", txt)
     # Bold
-    txt = re.sub(r" \*(.+)\* ", r"<b>\1</b>", txt)
+    txt = re.sub(r"\*([^ ](.+)[^ ])\*", r"<b>\1</b>", txt)
     # Italics
-    txt = re.sub(r" /(.+)/ ", r"<i>\1</i>", txt)
+    txt = re.sub(r"/([^ ](.+)[^ ])/", r"<i>\1</i>", txt)
     # Big
     txt = re.sub(r"# (.+)\n", r"<big>\1</big>\n", txt)
     # Subscript
     txt = re.sub(r"\_([0-9a-zA-Z]+?)( |\n){1}", r"<sub>\1</sub>\2", txt)
     # Superscript
-    txt = re.sub(r"\^(.+?)( |\n){1}", r"<sup>\1</sup>\2", txt)
+    txt = re.sub(r"\^([0-9a-zA-Z\(\)\+\-]+?)( |\n){1}", r"<sup>\1</sup>\2", txt)
     # Underline
-    txt = re.sub(r" \_(.+)\_ ", r"<u>\1</u>", txt)
+    txt = re.sub(r"\_((.|^ )+)\_", r"<u>\1</u>", txt)
     # Monospace
     txt = re.sub(r"\`(.+)\`", r"<tt>\1</tt>", txt)
     # Table
@@ -31,7 +38,7 @@ def markdown_to_gtk(text: str) -> str:
     # Strikethrough
     txt = re.sub(r"\~([0-9a-zA-Z ]+)\~", r"<s>\1</s>", txt)
     
-    print(txt)
+    # print(txt)
 
     return txt
 
