@@ -1,5 +1,6 @@
 import re
 from enum import Enum
+import markdown
 
 """BUG
 Writing '-- ' converts it into '-.'
@@ -7,39 +8,59 @@ Writing '-- ' converts it into '-.'
 
 def markdown_to_gtk(text: str) -> str:
     txt = text
-    # Not ignoring '<' symbol
-    txt = re.sub(r"<", r'&#x003C;', txt)
-    txt = re.sub(r">", r'&#x003E;', txt)
+    txt = markdown.markdown(text)
+    print("Before: ", txt)
     # Escape characters
     txt = re.sub(r"\\\\", r"&#x005C;", txt)
     txt = re.sub(r"\\\*", r"&#x002A;", txt)
     txt = re.sub(r"\\\_", r"&#x005F;", txt)
-    # Bullet
-    txt = re.sub(r"- (.+)\n", r"• \1\n", txt)
-    # Bold
-    txt = re.sub(r"\*([^ ](.+)[^ ])\*", r"<b>\1</b>", txt)
-    # Italics
-    txt = re.sub(r"/([^ ](.+)[^ ])/", r"<i>\1</i>", txt)
-    # Big
-    txt = re.sub(r"# (.+)\n", r"<big>\1</big>\n", txt)
-    # Subscript
-    txt = re.sub(r"\_([0-9a-zA-Z]+?)( |\n){1}", r"<sub>\1</sub>\2", txt)
-    # Superscript
-    txt = re.sub(r"\^([0-9a-zA-Z\(\)\+\-]+?)( |\n){1}", r"<sup>\1</sup>\2", txt)
-    # Underline
-    txt = re.sub(r"\_((.|^ )+)\_", r"<u>\1</u>", txt)
-    # Monospace
-    txt = re.sub(r"\`(.+)\`", r"<tt>\1</tt>", txt)
-    # Table
-    tables = re.findall(r"\`\`\n([\s\S]*?)\n\`\`", txt)
-    while(tables != []):
-        tables = re.findall(r"\`\`\n([\s\S]*?)\n\`\`", txt)
-        substitute_str = markdown_to_pretty_table(tables.pop())
-        txt = re.sub(r"\`\`\n([\s\S]*?)\n\`\`", substitute_str, txt)
-    # Strikethrough
-    txt = re.sub(r"\~([0-9a-zA-Z ]+)\~", r"<s>\1</s>", txt)
-    
-    # print(txt)
+    # TODO write down all the escape characters (automate it please)
+
+    # Clear out all <p>, <markup> tags
+    txt = re.sub(r"<p>([\w\W]*?)</p>", r"\1", txt)
+
+    # Headings
+    txt = re.sub(r"<h1>(.*)</h1>", r"<span font_desc='Fira Code 32'>\1</span>", txt)
+    txt = re.sub(r"<h2>(.*)</h2>", r"<span font_desc='Fira Code 30'>\1</span>", txt)
+    txt = re.sub(r"<h3>(.*)</h3>", r"<span font_desc='Fira Code 28'>\1</span>", txt)
+    txt = re.sub(r"<h4>(.*)</h4>", r"<span font_desc='Fira Code 26'>\1</span>", txt)
+
+    # List
+    ## Organise the <ul> tags
+    txt = re.sub(r"<ul>\n((\w|\W)*)</ul>", r"\1\n", txt)
+    ## Format the bullets
+    txt = re.sub(r"<li>(.*)</li>", r"• \1", txt)
+    # TODO add support for <ol> tags
+
+    # Line breaks
+    txt = re.sub(r"<br>", r"\n", txt)
+
+    # Emphasis
+    ## Bold
+    txt = re.sub(r"<strong>(.*)</strong>", r"<b>\1</b>", txt)
+
+    ## Italic
+    txt = re.sub(r"<em>(.*)</em>", r"<i>\1</i>", txt)
+
+    # Blockquotes
+    # TODO use box art to draw nice qoutes
+
+    # Code
+    txt = re.sub(r"<code>(.*)</code>", r"<tt>\1</tt>", txt)
+
+    # Horizontal rules
+    txt = re.sub(r"<hr />", r"------------------", txt)
+
+    # Links
+    ## Handled by that parser
+
+    # Images
+    # TODO Add image support
+
+    # HTML support
+    ## Inbuilt
+
+    print("After: ", txt)
 
     return txt
 
