@@ -2,14 +2,10 @@ import re
 from enum import Enum
 import markdown
 
-"""BUG
-Writing '-- ' converts it into '-.'
-"""
-
 def markdown_to_gtk(text: str) -> str:
     txt = text
     txt = markdown.markdown(text)
-    print("Before: ", txt)
+    # print("Before:", txt)
     # Escape characters
     txt = re.sub(r"\\\\", r"&#x005C;", txt)
     txt = re.sub(r"\\\*", r"&#x002A;", txt)
@@ -17,7 +13,7 @@ def markdown_to_gtk(text: str) -> str:
     # TODO write down all the escape characters (automate it please)
 
     # Clear out all <p>, <markup> tags
-    txt = re.sub(r"<p>([\w\W]*?)</p>", r"\1", txt)
+    txt = re.sub(r"<p>([\w\W]*?)</p>", r"\n\1\n", txt)
 
     # Headings
     txt = re.sub(r"<h1>(.*)</h1>", r"<span font_desc='Fira Code 32'>\1</span>", txt)
@@ -60,16 +56,53 @@ def markdown_to_gtk(text: str) -> str:
     # HTML support
     ## Inbuilt
 
-    print("After: ", txt)
+    # Tables
+    tables = re.findall(r"(\n(\|.+\|\n)+\n)", text)
+    for element in tables:
+        tables = re.findall(r"(\n(\|.+\|\n)+\n)", txt)
+        substitute_str = markdown_to_pretty_table(element[0])
+        # txt = re.sub(r"(\n(\|.+\|\n)+\n)", substitute_str, txt)
+        txt = txt.replace(element[0], substitute_str.strip('\n'))
+
+    # Footnotes
+
+    # Definition Lists
+
+    # Strikethrough
+
+    # Task Lists
+
+    # Emoji
+
+    # Highlight
+
+    # Subscript
+
+    # Superscript
+
+
+    # print("After:", txt)
 
     return txt
 
 def markdown_to_pretty_table(table: str) -> str:
     table = table.split('\n')
+    table = [i for i in table if i != '']
     ptable: list[list[str]] = []
 
     # Generate a 2d array containing all the items
     ptable.append([i.strip() for i in table[0].split('|') if i != ''])
+
+    # Find alignment of each row
+    alignment = [i.strip() for i in table[1].split('|') if i != '']
+    for index, item in enumerate(alignment):
+        if item[0]==':' and item[-1]==':':
+            alignment[index] = 'c'
+        elif item[-1]==':':
+            alignment[index] = 'r'
+        else:
+            alignment[index] = 'l'
+    
     for i in range(2, len(table)):
         ptable.append([i.strip() for i in table[i].split('|') if i != ''])
 
@@ -84,9 +117,16 @@ def markdown_to_pretty_table(table: str) -> str:
     # Print ptable formatted using max length
     output_string = "┌" + ("─"*max_len + "┬")*(len(ptable[0])-1) + ("─"*max_len + "┐") + '\n'
     row_num = 0
-    for i in ptable:
-        for j in i:
-            output_string += f"│{j.ljust(max_len)}"
+    for row in ptable:
+        for index, item in enumerate(row):
+            match alignment[index]:
+                case 'c':
+                    align_func = lambda text, length : text.center(length)
+                case 'r':
+                    align_func = lambda text, length : text.rjust(length)
+                case 'l':
+                    align_func = lambda text, length : text.ljust(length)
+            output_string += f"│{align_func(item, max_len)}"
         row_num+=1
         if row_num == 1:
             output_string += "│\n├" + ("─"*max_len + "┼")*(len(ptable[0])-1) + f"{'─'*max_len}┤"
@@ -94,7 +134,6 @@ def markdown_to_pretty_table(table: str) -> str:
             output_string += "│"
         output_string += '\n'
     output_string += "└" + ("─"*max_len + "┴")*(len(ptable[0])-1) + ("─"*max_len + "┘") + '\n'
-
 
     return output_string
     
