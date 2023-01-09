@@ -11,6 +11,7 @@ def markdown_to_gtk(text: str) -> str:
     txt = re.sub(r"<", r'&#x003C;', txt)
     txt = re.sub(r">", r'&#x003E;', txt)
     # Escape characters
+    txt = re.sub(r"\\\\", r"&#x005C;", txt)
     txt = re.sub(r"\\\*", r"&#x002A;", txt)
     txt = re.sub(r"\\\_", r"&#x005F;", txt)
     # Bullet

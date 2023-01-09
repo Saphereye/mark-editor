@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
-
 import gi
 import markdown_parser
+import save_window
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, Gio
@@ -93,7 +92,11 @@ class MainWindow(Gtk.Window):
     def initiate_key_press_sensing(self):
         self.connect("key-press-event",self.key_press_event)
         self.connect("key-release-event",self.key_release_event)
-        self.key_buffer = {}
+        self.key_buffer = {
+            's': False,
+            'z': False,
+            'n': False
+        }
     
     def key_press_event(self, widget, event):
         keyname = Gdk.keyval_name(event.keyval)
@@ -117,18 +120,38 @@ class MainWindow(Gtk.Window):
                 self.save()
             elif self.key_buffer['z']:
                 self.undo()
+            elif self.key_buffer['n']:
+                self.new()
     
     def save(self):
-        # TODO Open a save window to take user input
-        print("save")
+        buffer_text = self.text_buffer.get_text(
+            self.text_buffer.get_start_iter(),
+            self.text_buffer.get_end_iter(),
+            True
+        )
+
+        with open("output.md", "w") as file:
+            file.write(buffer_text)
+
+        window = save_window.SaveWindow()
+        window.set_default_size(WINDOW_WIDTH//2, WINDOW_HEIGHT//2)
+        window.set_position(Gtk.WindowPosition.CENTER)
+        # BUG main_quit closes all windows
+        window.connect("destroy", Gtk.main_quit)
+        window.show_all()
     
     def undo(self):
         # TODO Undo
         print("undo")
+    
+    def new(self):
+        print('new')
+        # Gtk.main()
 
-window = MainWindow()
-window.set_default_size(WINDOW_WIDTH, WINDOW_HEIGHT)
-window.set_position(Gtk.WindowPosition.CENTER)
-window.connect("destroy", Gtk.main_quit)
-window.show_all()
-Gtk.main()
+if __name__ == "__main__":
+    window = MainWindow()
+    window.set_default_size(WINDOW_WIDTH, WINDOW_HEIGHT)
+    window.set_position(Gtk.WindowPosition.CENTER)
+    window.connect("destroy", Gtk.main_quit)
+    window.show_all()
+    Gtk.main()
